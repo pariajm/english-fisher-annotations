@@ -1,2 +1,43 @@
-# fisher-annotation
-Fisher Annotations
+# Fisher Parse Trees and Disfluency Labels
+This repo contains the code for annotating Fisher Speech Transcripts. Since Fisher Corpus is not open-source, we cannot release the annotated transcripts. We instead provide the recipe for pre-processing and annotating Fisher transcripts. The annotations include silver constituency parse trees and silver disfluency labels which are allocated by using a state-of-the-art joint parsing and disfluency detection model, as described in [Improving Disfluency Detection by Self-Training a Self-Attentive Model](https://www.aclweb.org/anthology/2020.acl-main.346/) from ACL 2020.
+
+### Using the model to annotate Fisher 
+```
+$ git clone https://github.com/pariajm/fisher-annotations
+$ cd fisher-annotations
+$ mkdir model && cd model
+$ wget https://github.com/pariajm/joint-disfluency-detection-and-parsing/releases/download/naacl2019/swbd_fisher_bert_Edev.0.9078.pt
+$ wget https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-uncased-vocab.txt
+$ wget https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-uncased.tar.gz
+$ tar -xf bert-base-uncased.tar.gz && cd ..
+$ python main.py --input-path /path/to/extracted/LDC2004T19/and/LDC2005T19 --output-path /path/to/outputs --model-path ./model/swbd_fisher_bert_Edev.0.9078.pt 
+```
+
+### Using the model to annotate your own data
+You can use the repo to find silver parse trees as well as disfluency labels of your own sentences, but you probably need to modify the pre-processing part a bit!
+
+### Citation
+If you use this code, please cite the following paper:
+```
+@inproceedings{jamshid-lou-2020-improving,
+    title = "Improving Disfluency Detection by Self-Training a Self-Attentive Model",
+    author = "Jamshid Lou, Paria and Johnson, Mark",
+    booktitle = "Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics",
+    month = "jul",
+    year = "2020",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://www.aclweb.org/anthology/2020.acl-main.346",
+    pages = "3754--3763"
+}
+```
+
+### Contact
+Paria Jamshid Lou <paria.jamshid-lou@hdr.mq.edu.au>
+
+### Credit
+### Credits
+The code for self-attentive parser is based on https://github.com/nikitakit/self-attentive-parser.
+The code for pre-processing Fisher is based on https://github.com/mozilla/DeepSpeech/blob/master/bin/import_fisher.py.
+
+
