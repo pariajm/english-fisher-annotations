@@ -36,8 +36,8 @@ If you use this code, please cite the following paper:
 Paria Jamshid Lou <paria.jamshid-lou@hdr.mq.edu.au>
 
 ### Credit
-### Credits
 The code for self-attentive parser is based on https://github.com/nikitakit/self-attentive-parser.
+
 The code for pre-processing Fisher is based on https://github.com/mozilla/DeepSpeech/blob/master/bin/import_fisher.py.
 
 
