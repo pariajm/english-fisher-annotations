@@ -21,7 +21,7 @@ $ python main.py --input-path /path/to/extracted/LDC2004T19/and/LDC2005T19 --out
 You can use the repo to find silver parse trees as well as disfluency labels of your own sentences, but you probably need to modify the pre-processing part a bit!
 
 # The Model
-If you want to re-train the model or know more about it, see [here]([here](https://github.com/pariajm/joint-disfluency-detection-and-parsing)
+If you want to know more about the model, read our paper cited as below or check our repo [here](https://github.com/pariajm/joint-disfluency-detection-and-parsing).
 
 ### Citation
 If you use this code, please cite the following paper:
