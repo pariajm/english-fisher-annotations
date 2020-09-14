@@ -1,7 +1,9 @@
 # Fisher Parse Trees and Disfluency Labels
-This repo contains the code for annotating Fisher Speech Transcripts. Since Fisher Corpus is not open-source, we cannot release the annotated transcripts. We instead provide the recipe for pre-processing and annotating Fisher transcripts. The annotations include silver constituency parse trees and silver disfluency labels which are allocated by using a state-of-the-art joint parsing and disfluency detection model (with parsing accuracy of 93.9% and disfluency f-score of 92.4% on Switchboard dev set), as described in [Improving Disfluency Detection by Self-Training a Self-Attentive Model](https://www.aclweb.org/anthology/2020.acl-main.346/) from ACL 2020.
+This repo contains the code for annotating Fisher Speech Transcripts. Since Fisher Corpus is not open-source, we cannot release the annotated transcripts. We instead provide the recipe for pre-processing and annotating Fisher transcripts. The annotations include silver constituency parse trees and silver disfluency labels which are allocated using a state-of-the-art joint parsing and disfluency detection model (with parsing accuracy of 93.9% and disfluency detection f-score of 92.4% on Switchboard dev set), as described in [Improving Disfluency Detection by Self-Training a Self-Attentive Model](https://www.aclweb.org/anthology/2020.acl-main.346/) from ACL 2020.
 
 ### Using the model to annotate Fisher 
+Running the following commands, you will end up with two types of output: ```fe_**_****_parse.txt``` which includes Fisher constituency parse trees and ```fe_**_****_dys.txt``` which contains Fisher disfluency labelled transcripts (where *_* and *E* indicate that the previous word is fluent and disfluent, respectively).
+
 ```
 $ git clone https://github.com/pariajm/fisher-annotations
 $ cd fisher-annotations
