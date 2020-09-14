@@ -4,7 +4,7 @@ This repo contains the code for annotating Fisher Speech Transcripts. Since Fish
 ### Using the model to annotate Fisher 
 Running the following commands, you will end up with two types of output: 
 * ```fe_**_****_parse.txt``` which includes Fisher constituency parse trees
-* ```fe_**_****_dys.txt``` which contains Fisher disfluency labelled transcripts (where *_* and *E* indicate that the previous word is fluent and disfluent, respectively)
+* ```fe_**_****_dys.txt``` which contains Fisher disfluency labelled transcripts (where *_* and *E* indicate that the previous word is fluent or disfluent, respectively)
 
 ```
 $ git clone https://github.com/pariajm/fisher-annotations
@@ -19,6 +19,9 @@ $ python main.py --input-path /path/to/extracted/LDC2004T19/and/LDC2005T19 --out
 
 ### Using the model to annotate your own data
 You can use the repo to find silver parse trees as well as disfluency labels of your own sentences, but you probably need to modify the pre-processing part a bit!
+
+# The Model
+If you want to re-train the model or know more about it, see [here]([here](https://github.com/pariajm/joint-disfluency-detection-and-parsing)
 
 ### Citation
 If you use this code, please cite the following paper:
