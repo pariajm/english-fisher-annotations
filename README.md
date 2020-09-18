@@ -4,7 +4,7 @@ This repo contains the code for annotating English Fisher Speech Transcripts. Si
 ### Using the model to annotate Fisher 
 Running the following commands, you will end up with two types of output: 
 * ```fe_**_****_parse.txt``` which includes Fisher constituency parse trees
-* ```fe_**_****_dys.txt``` which contains Fisher disfluency labelled transcripts (where *_* and *E* indicate that the previous word is fluent or disfluent, respectively)
+* ```fe_**_****_dys.txt``` which contains Fisher disfluency labelled transcripts (where *_* and *E* indicate that the previous word is fluent or disfluent, respectively). Remove the words tagged as *E* to obtain the fluent version of transcripts.
 
 ```
 $ git clone https://github.com/pariajm/fisher-annotations
