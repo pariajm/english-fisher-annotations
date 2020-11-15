@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """
 This module includes the code for pre-processing and annotating Fisher 
 transcripts using a SOTA joint parser and disfluency detector model. 
