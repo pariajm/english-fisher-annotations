@@ -2,7 +2,7 @@
 This repo contains the code for annotating English Fisher Speech Part I and II Transcripts. Since Fisher Corpus is not open-source, we cannot release the annotated transcripts. We instead provide the recipe by which you can pre-process, annotate and obtain the fluent version of Fisher transcripts. The annotations include silver constituency parse trees and silver disfluency labels which are allocated using a state-of-the-art joint parsing and disfluency detection model (with parsing accuracy of 93.9% and disfluency detection f-score of 92.4% on Switchboard dev set), as described in [Improving Disfluency Detection by Self-Training a Self-Attentive Model](https://www.aclweb.org/anthology/2020.acl-main.346/) from ACL 2020. Since a disfluency tag is allocated to each word, you can easily have the fluent English Fisher transcripts by removing the words tagged as disfluent.
 
 ### Basic Overview
-![basic overview](img/basic.png "basic overview of joint parser and disfluency detector)
+![basic overview](img/basic.png "basic overview of joint parser and disfluency detector")
 
 ### Software Requirements
 - Python 3.6 or higher.
