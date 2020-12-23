@@ -36,7 +36,7 @@ $ tar -xf bert-base-uncased.tar.gz && cd ..
 To parse and disfluency tag the transcripts:
 
 ```bash
-$ python main.py --input-path /path/to/extracted/LDC2004T19/and/LDC2005T19 --output-path /path/to/outputs/for/saving/results --model-path ./model/swbd_fisher_bert_Edev.0.9078.pt 
+$ python main.py --input-path /path/to/extracted/LDC2004T19/and/LDC2005T19 --output-path /path/to/outputs/for/saving/results --model ./model/swbd_fisher_bert_Edev.0.9078.pt 
 ```
 
 Running the above command, you will end up with two types of output: 
