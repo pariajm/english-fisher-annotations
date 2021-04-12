@@ -224,21 +224,14 @@ class Annotate(Parser):
                     output_file.write(line)   
                     continue    
                 tokens = line.split()
-                
+                output_file.write(" ".join(tokens[:3])+" ")  
                 # print('__________',line)
                 # print('***********',output_file)
                 # print("\n"*2)
-                if set(tokens[3:]) < set(['[cough]', '[sneeze]', '[laughter]', '[[skip]]', '[mn]', '[breath]', '[pause]', '[lipsmack]', '[noise]', '[sigh]', '[laugh]']):
-                   #output_file.write(tokens[3]+"\n") 
-                   2>1
+                if len(tokens[3:]) == 1 and tokens[3] in ['[cough]', '[sneeze]', '[laughter]', '[[skip]]', '[mn]', '[breath]', '[pause]', '[lipsmack]', '[noise]', '[sigh]', '[laugh]']:
+                   output_file.write(tokens[3]+"\n") 
                 elif len(tokens[3:]) == 2 and " ".join(tokens[3:]) == "(( ))":
-                   2>1
-                   #output_file.write(tokens[3]+"\n") 
-                elif set(tokens[3:]) < set(intj):
-                   idx += 1
-                elif set(tokens[3:]) < (set(['[cough]', '[sneeze]', '[laughter]', '[[skip]]', '[mn]', '[breath]', '[pause]', '[lipsmack]', '[noise]', '[sigh]', '[laugh]']) ^ set(intj)):
-                   2>1
-                   idx += 1
+                   output_file.write(tokens[3]+"\n") 
                 else:                      
                     outputs = []
                     cntr = 0
@@ -250,13 +243,12 @@ class Annotate(Parser):
                             outputs[-1] = outputs[-1]+w
                         else:
                             if w in intj:
-                                #outputs.append("<fp>")
+                                outputs.append("<fp>")
                                 cntr += 1
                             elif w in ['[cough]', '[sneeze]', '[laughter]', '[[skip]]', '[mn]', '[breath]', '[pause]', '[lipsmack]', '[noise]', '[sigh]', '[laugh]', "))", "(("]:
-                                #outputs.append(w)  
-                                2>1
+                                outputs.append(w)  
                             elif w[-1] == "-" or w[0] == "-":
-                                outputs.append("'pw'") 
+                                outputs.append("<pw>") 
                                 cntr += 1
                             else:
                                 lbls = df_labels[idx]
@@ -264,14 +256,12 @@ class Annotate(Parser):
                                     outputs.append(w) 
                                     cntr += 1
                                 elif lbls[cntr] == "E":
-                                    #outputs.append("<df>")
+                                    outputs.append("<df>")
                                     cntr += 1
                         # else:
                         #     print(lbls[cntr], w)
-                    if outputs != []:
-                        output_file.write(" ".join(tokens[:3])+" ")  
-                        output_file.write(" ".join(outputs))
-                        output_file.write("\n")
+                    output_file.write(" ".join(outputs))
+                    output_file.write("\n")
                     if cntr != 0:
                         idx += 1
 

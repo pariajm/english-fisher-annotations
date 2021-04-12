@@ -19,6 +19,7 @@ import os
 import re   
 import torch
 
+import subprocess as sp
 import parse_nk
 
 intj = ["uh-huh", "um-hum", "huh-huh", "uh", "um", "huh", "hm", "hum", "oh", "ahah", "ah" , "aha", "eh", "er", "uhah", "huhuh", "mhm", "mm", "hmm", "hm", "em", "hmmm", "yeahhuh", "mmmm", "mmm", "mhmh", "mhm's", "mmhm", "hmhm", "ahha", "uhhum", "shh", "uhhh", "ahh", "umm", "err", "ooh", "ahem", "duh", "aw", "ew", "phew", "shoo", "whoa", "uhoh", "ugh", "phooey", "ouch", "oops", "gee", "ha", "aye", "uhhuh", "umhum", "huhhuh", 'uh-uh', 'hehe', 'uh-oh', 'uhuh', 'huh-uh', 'ahuh', 'um', 'uhm' ] 
@@ -70,8 +71,7 @@ class DisfluencyTagger:
                     wrds[-1] = wrds[-1]+tmp_token
                 else:
                     wrds.append(tmp_token) 
-                    tags.append(label)     
-
+                    tags.append(label)                 
             if all(
                 (close_bracket,
                 open_bracket == close_bracket)
@@ -80,8 +80,10 @@ class DisfluencyTagger:
                 df_region = False            
 
             pointer += 1
-        # return " ".join(list(map(lambda t: " ".join(t), tags)))
+        # print(wrds)
+        # print(tags)
         return tags
+
 
 class Parser(DisfluencyTagger):
     """
@@ -145,7 +147,7 @@ class Parser(DisfluencyTagger):
                 else:
                     df_labels.append(self.disfluent(tokens))
                     
-        return parse_trees, df_labels
+        return df_labels
 
            
 class Annotate(Parser):   
@@ -163,23 +165,13 @@ class Annotate(Parser):
     def setup(self): 
         all_2004 = self.parse_sentences(            
             trans_data=os.path.join(
-                "LDC2004T19", 
-                "fe_03_p1_tran", 
-                "data", 
-                "trans",
+                "switchboard_word_alignments", 
+                "swb_ms98_transcriptions",
                 ),
-            parsed_data="fisher-2004-annotations"
+            parsed_data="swbd-annotations"
         )
 
-        # all_2005 = self.parse_sentences(
-        #     trans_data=os.path.join(
-        #         "LDC2005T19", 
-        #         "fe_03_p2_tran", 
-        #         "data", 
-        #         "trans",
-        #         ),
-        #     parsed_data="fisher-2005-annotations"
-        # )
+        
 
     def parse_sentences(self, trans_data, parsed_data):
         input_dir = os.path.join(self.input_path, trans_data)
@@ -188,98 +180,135 @@ class Annotate(Parser):
             os.makedirs(output_dir)   
         # Loop over transcription files
         for root, dirnames, filenames in os.walk(input_dir):
-            for filename in fnmatch.filter(filenames, "*.txt"):
+            for filename in fnmatch.filter(filenames, "*trans.text"):
                 print(filename)
                 trans_file = os.path.join(root, filename)
                 segments = self.read_transcription(trans_file) 
                 # Loop over cleaned/pre-proceesed transcripts         
                 doc = [segment for segment in segments if segment]    
-                parse_trees, df_labels = self.run_parser(doc)
+                df_labels = self.run_parser(doc)
                 # Write constituency parse trees and disfluency labels into files
                 # new_filename = os.path.join(
                 #     output_dir, 
                 #     os.path.basename(trans_file[:-4])+"_parse.txt"
                 #     )
                 # with open(new_filename, "w") as output_file:
-                #     output_file.write("\n".join(parse_trees))
-
-                folder_path = os.path.join(output_dir, root[-3:])
+                #     outputdf_labels_file.write("\n".join(parse_trees))
+                root_path = os.path.join(output_dir, root[-7:-5])
+                if not os.path.exists(root_path):
+                    os.mkdir(root_path)
+                folder_path = os.path.join(root_path, root[-4:])
                 if not os.path.exists(folder_path):
                     os.mkdir(folder_path)
                 new_filename = os.path.join(
                         folder_path, 
-                        os.path.basename(trans_file)
+                        os.path.basename(trans_file[:-4])+"text"
                         )
-                Annotate.write_tags(new_filename, trans_file, df_labels)                
-        return
+                Annotate.write_tags(new_filename, trans_file, df_labels)
+                # with open(new_filename, "w") as output_file:
+                #     output_file.write("\n".join(df_labels))
 
+        return
+    @staticmethod
+    def name_changer(filename):
+        new_names = []
+        args = ["awk", r'{name=substr($1,1,6); gsub("^sw","sw0",name); side=substr($1,7,1); stime=$2; etime=$3;  printf("%s-%s_%06.0f-%06.0f", name, side, int(100*stime+0.5), int(100*etime+0.5)); for(i=4;i<=NF;i++) printf(" %s", $i); printf "\n"}', filename]
+        p = sp.Popen(args, stdin = sp.PIPE, stdout = sp.PIPE, stderr = sp.PIPE )
+        for l in p.stdout:
+            new_names.append(l.decode().split()[0])
+        return new_names
 
     @staticmethod
     def write_tags(new_filename, trans_file, df_labels):
         output_file = open(new_filename, "w") 
         with codecs.open(trans_file, "r", "utf-8") as fp:
             idx = 0
+            idxxx = 0
+            new_names = Annotate.name_changer(trans_file)
             for line in fp:
-                if line.startswith("#") or len(line) <= 1:
-                    output_file.write(line)   
-                    continue    
+            #     if line.startswith("#") or len(line) <= 1:
+            #         output_file.write(line+"\n")       
                 tokens = line.split()
                 
-                # print('__________',line)
-                # print('***********',output_file)
+                #print('__________',df_labels)
+                #print('***********',line)
                 # print("\n"*2)
-                if set(tokens[3:]) < set(['[cough]', '[sneeze]', '[laughter]', '[[skip]]', '[mn]', '[breath]', '[pause]', '[lipsmack]', '[noise]', '[sigh]', '[laugh]']):
+                if len(tokens[3:]) == 1 and tokens[3] in ["[silence]", "[noise]", "[laughter]", "[vocalized-noise]"]:
+                    2>1
+                    idxxx += 1
                    #output_file.write(tokens[3]+"\n") 
-                   2>1
-                elif len(tokens[3:]) == 2 and " ".join(tokens[3:]) == "(( ))":
-                   2>1
-                   #output_file.write(tokens[3]+"\n") 
+                elif len(tokens[3:]) == 1 and tokens[3] in intj:
+                   idx +=1 
+                   idxxx += 1
+                elif len(tokens[3:]) == 1 and "<" in tokens[3] and ">" in tokens[3]:
+                   idx +=1 
+                   idxxx += 1
+                elif set(tokens[3:]) < set(["[silence]", "[noise]", "[laughter]", "[vocalized-noise]"]):
+                    2>1
+                    idxxx += 1
                 elif set(tokens[3:]) < set(intj):
-                   idx += 1
-                elif set(tokens[3:]) < (set(['[cough]', '[sneeze]', '[laughter]', '[[skip]]', '[mn]', '[breath]', '[pause]', '[lipsmack]', '[noise]', '[sigh]', '[laugh]']) ^ set(intj)):
-                   2>1
-                   idx += 1
-                else:                      
-                    outputs = []
+                    idx += 1
+                    idxxx += 1
+                elif set(tokens[3:]) < set(["[silence]", "[noise]", "[laughter]", "[vocalized-noise]"]) ^ set(intj):
+                    idxxx+=1
+                    idx +=1 
+                else: 
+                    output_file.write(new_names[idxxx]+" ")                     
                     cntr = 0
                     for w in tokens[3:]:
                         w = w.lower()
                         if w[-2:] == "_1":
                             w = w[:-2]
-                        if w in ["'s", "'d", "'re", "'ve", "'m", "'ll", "n't"]:
-                            outputs[-1] = outputs[-1]+w
-                        else:
-                            if w in intj:
-                                #outputs.append("<fp>")
+                        if w in intj:
+                            output_file.write(w.upper()+" ")
+                            cntr += 1
+                        elif "<" in w or ">" in w:
+                            cntr += 1
+                        elif w in ["[silence]", "[noise]", "[laughter]", "[vocalized-noise]"]:
+                            #output_file.write(w+" ") 
+                            2>1 
+                        
+                        elif w[-1] == "-" or w[0] == "-":
+                            output_file.write("'pw' ")  
+                            cntr += 1
+                        else:                              
+                            lbls = df_labels[idx]
+                            #print(lbls)
+                            #print(w, cntr)
+                            if "[laughter-" in w:
+                                w = w.replace("[laughter-", "")
+                                w = w.replace("]", "")
+                            elif "[" in w and "/" in w:
+                                didi = w.index("/")
+                                w = w[didi+1:-1]
+                                if "-[" in w or "]-" in w:
+                                    w = 'pw'
+                            elif "[" in w and w[-1] == "-":
+                                w = "'pw'"
+                            if w == "'pw'":
+                                output_file.write(w+" ")  
                                 cntr += 1
-                            elif w in ['[cough]', '[sneeze]', '[laughter]', '[[skip]]', '[mn]', '[breath]', '[pause]', '[lipsmack]', '[noise]', '[sigh]', '[laugh]', "))", "(("]:
-                                #outputs.append(w)  
-                                2>1
-                            elif w[-1] == "-" or w[0] == "-":
-                                outputs.append("'pw'") 
+                            elif lbls[cntr] == "_":
+                                output_file.write(w+" ")  
                                 cntr += 1
-                            else:
-                                lbls = df_labels[idx]
-                                if lbls[cntr] == "_":
-                                    outputs.append(w) 
-                                    cntr += 1
-                                elif lbls[cntr] == "E":
-                                    #outputs.append("<df>")
-                                    cntr += 1
+                            elif lbls[cntr] == "E":
+                                #output_file.write("<df> ")  
+                                cntr += 1
                         # else:
                         #     print(lbls[cntr], w)
-                    if outputs != []:
-                        output_file.write(" ".join(tokens[:3])+" ")  
-                        output_file.write(" ".join(outputs))
-                        output_file.write("\n")
+                    output_file.write("\n")
                     if cntr != 0:
                         idx += 1
+                    idxxx += 1
+
+
+
 
     def read_transcription(self, trans_file):
         with codecs.open(trans_file, "r", "utf-8") as fp:
             for line in fp:
                 if line.startswith("#") or len(line) <= 1:
-                    continue                
+                    continue             
                 tokens = line.split() 
                 yield self.validate_transcription(
                     " ".join(tokens[3:])
@@ -287,24 +316,33 @@ class Annotate(Parser):
 
     @staticmethod
     def validate_transcription(label):
-        # if re.search(r"[0-9]|[(<\[\]&*{]", label):
-        #     return None
-        label = label.replace("_", "")
+        if "[" in label:
+            words = label.split()
+            for j in range(len(words)):
+                if "]-" in words[j]:
+                    s_idx = words[j].index("[")
+                    words[j] = words[j][:s_idx]+"-"
+                if "-[" in words[j]:
+                    s_idx = words[j].index("]")
+                    words[j] = "-"+words[j][s_idx:]
+                if "[" in words[j] and "/" in words[j]:
+                    idx = words[j].index("/")
+                    words[j] = words[j][idx+1:-1]
+            label = " ".join(words)
+        
+        label = label.replace("_1", " ")
+        label = label.replace("_", " ")
         label = re.sub("[ ]{2,}", " ", label)
-        label = label.replace("[[skip]]", "")
-        label = label.replace("[cough]", "")
+        label = label.replace("[laughter-", "")
         label = label.replace("[laughter]", "")
         label = label.replace("[noise]", "")
-        label = label.replace("[laugh]", "")
-        label = label.replace("[breath]", "")
-        label = label.replace("[sneeze]", "")
-        label = label.replace("[pause]", "")
-        label = label.replace("[mn]", "")
-        label = label.replace("[lipsmack]", "")
-        label = label.replace("[sigh]", "")
-        label = label.replace("((", "")
-        label = label.replace("))", "")
+        label = label.replace("[silence]", "")
+        label = label.replace("[vocalized-noise]", "")
         label = label.replace(".", "")
+        label = label.replace("]-", "-")
+        label = label.replace("-[", "-")
+        label = label.replace("[", "")
+        label = label.replace("]", "")
         label = label.replace(",", "")
         label = label.replace(";", "")
         label = label.replace("?", "")
@@ -320,5 +358,7 @@ class Annotate(Parser):
         label = label.replace("'s", " 's")
         label = label.strip()
         label = label.lower()
+
+        return label if label else None   
 
         return label if label else None   

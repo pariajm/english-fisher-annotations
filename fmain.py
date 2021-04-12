@@ -4,8 +4,8 @@ import argparse
 import os
 
 
-#import fisher_annotator
-import swbd_annotator
+import fisher_annotator
+#import swbd_annotator
 
 def main():
     parser = argparse.ArgumentParser()
@@ -15,8 +15,8 @@ def main():
     parser.add_argument("--disfluency", type=bool, default=True)
     args = parser.parse_args()
 
-    #labels = fisher_annotator.Annotate(
-    labels = swbd_annotator.Annotate(
+    labels = fisher_annotator.Annotate(
+    #labels = swbd_annotator.Annotate(
         input_path=args.input_path,
         output_path=args.output_path,
         model=args.model,
